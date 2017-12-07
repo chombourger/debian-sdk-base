@@ -1,0 +1,83 @@
+#!/bin/bash
+
+# Script arguments
+SRC_DIR=${1}
+BUILD_DIR=${2}
+BUILD_ARCH=${3}
+BUILD_HASH=${4}
+BUILD_VERSION=${5}
+
+DISTRO_ARCH=amd64
+DISTRO_URL=${DEB_MIRROR:-http://deb.debian.org/debian}
+DISTRO_REL=stretch
+DISTRO_VAR=minbase
+
+IMG_DIR=${SRC_DIR}/images/${BUILD_ARCH}
+PF_DIR=${BUILD_DIR}/${BUILD_ARCH}/platform
+PF_IMG=debian-contents-platform-${BUILD_VERSION}-${BUILD_ARCH}-${BUILD_HASH}
+SDK_DIR=${BUILD_DIR}/${BUILD_ARCH}/sdk
+SDK_IMG=debian-contents-sdk-${BUILD_VERSION}-${BUILD_ARCH}-${BUILD_HASH}
+VERSION=${BUILD_VERSION}
+
+create_platform() {
+	sudo rm -rf ${PF_DIR}				\
+	&& mkdir -p ${PF_DIR}				\
+	&& sudo debootstrap				\
+		--arch=${DISTRO_ARCH}			\
+		--variant=${DISTRO_VAR}			\
+		${DISTRO_REL}				\
+		${PF_DIR}				\
+		${DISTRO_URL}
+}
+
+create_sdk_from_platform() {
+	sudo rm -rf ${SDK_DIR}				\
+	&& sudo cp -r ${PF_DIR} ${SDK_DIR}
+}
+
+augment_sdk() {
+	sudo chroot ${SDK_DIR}				\
+		usr/bin/apt install -y			\
+			autoconf			\
+			automake			\
+			bison				\
+			flex				\
+			gcc				\
+			gdb				\
+			libtool				\
+			make
+}
+
+package_platform() {
+	mkdir -p ${IMG_DIR}						\
+	&& sudo tar -C ${PF_DIR}					\
+		-zcf ${IMG_DIR}/${PF_IMG}.tar.gz			\
+		.							\
+	&& (sudo chroot ${PF_DIR}					\
+		usr/bin/dpkg-query -W					\
+			-f '${Package} ${Architecture} ${Version}')	\
+		>${IMG_DIR}/${PF_IMG}.manifest
+}
+
+package_sdk() {
+	mkdir -p ${IMG_DIR}						\
+	&& sudo tar -C ${SDK_DIR}					\
+		-zcf ${IMG_DIR}/${SDK_IMG}.tar.gz			\
+		.							\
+	&& (sudo chroot ${SDK_DIR}					\
+		usr/bin/dpkg-query -W					\
+			-f '${Package} ${Architecture} ${Version}')	\
+		>${IMG_DIR}/${SDK_IMG}.manifest
+}
+
+main() {
+	create_platform					\
+	&& create_sdk_from_platform			\
+	&& augment_sdk					\
+	&& package_platform				\
+	&& package_sdk					\
+	&& true
+}
+
+main ${*}
+

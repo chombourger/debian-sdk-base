@@ -1,0 +1,4 @@
+[Runtime]
+name=org.debian.BasePlatform
+runtime=org.debian.BasePlatform/@@ARCH@@/@@VERSION@@
+sdk=org.debian.BaseSdk/@@ARCH@@/@@VERSION@@
