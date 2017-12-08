@@ -73,7 +73,7 @@ ${FILE_REF_PLATFORM}: metadata.platform.in ${PLATFORM_IMAGE}
 	rm -rf platform
 
 sandboxed:
-	flatpak-builder --repo=$(REPO) --force-clean app org.debian.Stress.json
+	flatpak-builder --repo=$(REPO) --force-clean ${GPG_ARGS} app org.debian.Stress.json
 	flatpak build-bundle $(REPO) debian-stress.bundle org.debian.Stress master
 
 export: platform sdk
