@@ -1,0 +1,37 @@
+{
+    "app-id": "org.debian.Stress",
+    "runtime": "org.debian.BasePlatform",
+    "runtime-version": "0.1",
+    "sdk": "org.debian.BaseSdk",
+    "command": "/usr/bin/stress",
+    "finish-args": [
+        "--talk-name=org.freedesktop.Flatpak",
+        "--share=network",
+        "--filesystem=host",
+        "--filesystem=/var/lib/flatpak",
+        "--allow=devel"
+    ],
+    "build-options" : {
+        "cflags": "-O2 -g",
+        "cxxflags": "-O2 -g",
+        "env": {
+            "MOUNT_FUSE_PATH": "../tmp/",
+            "INIT_D_PATH": "/app/etc/init.d/",
+            "V": "1"
+        }
+    },
+    "cleanup": ["*.la", "*.a"],
+    "modules": [
+        {
+            "name": "stress",
+            "cleanup": [ "/lib", "/share" ],
+            "sources": [
+                {
+                    "type": "archive",
+                    "url": "https://people.seas.harvard.edu/~apw/stress/stress-1.0.4.tar.gz",
+                    "sha256": "057e4fc2a7706411e1014bf172e4f94b63a12f18412378fca8684ca92408825b"
+                }
+            ]
+        }
+    ]
+}

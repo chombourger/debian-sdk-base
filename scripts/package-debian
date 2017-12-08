@@ -20,54 +20,65 @@ SDK_IMG=debian-contents-sdk-${BUILD_VERSION}-${BUILD_ARCH}-${BUILD_HASH}
 VERSION=${BUILD_VERSION}
 
 create_platform() {
-	sudo rm -rf ${PF_DIR}				\
-	&& mkdir -p ${PF_DIR}				\
-	&& sudo debootstrap				\
-		--arch=${DISTRO_ARCH}			\
-		--variant=${DISTRO_VAR}			\
-		${DISTRO_REL}				\
-		${PF_DIR}				\
+	sudo rm -rf ${PF_DIR}						\
+	&& mkdir -p ${PF_DIR}						\
+	&& sudo debootstrap						\
+		--arch=${DISTRO_ARCH}					\
+		--variant=${DISTRO_VAR}					\
+		${DISTRO_REL}						\
+		${PF_DIR}						\
 		${DISTRO_URL}
 }
 
 create_sdk_from_platform() {
-	sudo rm -rf ${SDK_DIR}				\
+	sudo rm -rf ${SDK_DIR}						\
 	&& sudo cp -r ${PF_DIR} ${SDK_DIR}
 }
 
 augment_sdk() {
-	sudo chroot ${SDK_DIR}				\
-		usr/bin/apt install -y			\
-			autoconf			\
-			automake			\
-			bison				\
-			flex				\
-			gcc				\
-			gdb				\
-			libtool				\
-			make
+	sudo chroot ${SDK_DIR}						\
+		usr/bin/apt install -y					\
+			autoconf					\
+			automake					\
+			bison						\
+			flex						\
+			gcc						\
+			gdb						\
+			libtool						\
+			make						\
+			pkg-config
+}
+
+fix_runtime() {
+	rt_dir=${1}
+	sudo cp -ra ${1}/bin/* ${1}/usr/bin/				\
+	&& sudo cp -ra ${1}/lib/* ${1}/usr/lib/				\
+	&& sudo cp -ra ${1}/lib64 ${1}/usr/
+}
+
+create_manifest() {
+	rt_dir=${1}
+	mnf=${2}
+	(sudo chroot ${rt_dir}						\
+		usr/bin/dpkg-query -W					\
+			-f '${Package} ${Architecture} ${Version}\n')	\
+		>${mnf}
 }
 
 package_platform() {
 	mkdir -p ${IMG_DIR}						\
+	&& fix_runtime ${PF_DIR}					\
 	&& sudo tar -C ${PF_DIR}					\
-		-zcf ${IMG_DIR}/${PF_IMG}.tar.gz			\
-		.							\
-	&& (sudo chroot ${PF_DIR}					\
-		usr/bin/dpkg-query -W					\
-			-f '${Package} ${Architecture} ${Version}')	\
-		>${IMG_DIR}/${PF_IMG}.manifest
+		-zcf ${IMG_DIR}/${PF_IMG}.tar.gz .			\
+	&& create_manifest ${PF_DIR} ${IMG_DIR}/${PF_IMG}.manifest
 }
 
 package_sdk() {
 	mkdir -p ${IMG_DIR}						\
+	&& fix_runtime ${SDK_DIR}					\
 	&& sudo tar -C ${SDK_DIR}					\
-		-zcf ${IMG_DIR}/${SDK_IMG}.tar.gz			\
-		.							\
-	&& (sudo chroot ${SDK_DIR}					\
-		usr/bin/dpkg-query -W					\
-			-f '${Package} ${Architecture} ${Version}')	\
-		>${IMG_DIR}/${SDK_IMG}.manifest
+		-zcf ${IMG_DIR}/${SDK_IMG}.tar.gz .			\
+	&& create_manifest ${SDK_DIR} ${IMG_DIR}/${SDK_IMG}.manifest
 }
 
 main() {

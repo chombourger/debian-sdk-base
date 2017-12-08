@@ -1,5 +1,5 @@
 # Override the arch with `make ARCH=i386`
-VERSION = 1.6
+VERSION = 0.1
 ARCH   ?= $(shell flatpak --default-arch)
 REPO   ?= repo
 
@@ -31,14 +31,14 @@ FILE_REF_SDK=${REPO}/refs/heads/${REF_SDK}
 
 all: ${FILE_REF_PLATFORM} ${FILE_REF_SDK}
 
-COMMIT_ARGS=--repo=${REPO} # --canonical-permissions
+COMMIT_ARGS=--repo=${REPO} # not supported on Debian 9: --canonical-permissions
 
 ${IMAGES} allimages:
 	rm -f ${IMAGEDIR}/debian-contents-*.tar.gz # Remove all old images to make space
 	mkdir -p build/${ARCH}
 	./scripts/package-debian ${srcdir}/ ${builddir}/build/ ${ARCH} ${HASH} ${VERSION}
 
-.PHONY: sdk platform
+.PHONY: sdk platform sandboxed export bundles
 
 sdk: ${FILE_REF_SDK}
 
@@ -73,10 +73,10 @@ ${FILE_REF_PLATFORM}: metadata.platform.in ${PLATFORM_IMAGE}
 	rm -rf platform
 
 sandboxed:
-	flatpak-builder --force-clean  app org.freedesktop.Builder.json
+	flatpak-builder --force-clean  app org.debian.Stress.json
 	flatpak build app make all
 
-export:
+export: platform sdk
 	flatpak build-update-repo $(REPO) ${EXPORT_ARGS} --generate-static-deltas
 
 bundles: export
