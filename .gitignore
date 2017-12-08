@@ -1,4 +1,4 @@
-*.bundle
+*.flatpak
 .flatpak-builder
 app
 build

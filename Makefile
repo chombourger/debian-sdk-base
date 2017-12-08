@@ -38,7 +38,7 @@ ${IMAGES} allimages:
 	mkdir -p build/${ARCH}
 	./scripts/package-debian ${srcdir}/ ${builddir}/build/ ${ARCH} ${HASH} ${VERSION}
 
-.PHONY: sdk platform sandboxed export bundles
+.PHONY: sdk platform sandboxed export bundles clean
 
 sdk: ${FILE_REF_SDK}
 
@@ -74,11 +74,14 @@ ${FILE_REF_PLATFORM}: metadata.platform.in ${PLATFORM_IMAGE}
 
 sandboxed:
 	flatpak-builder --repo=$(REPO) --force-clean ${GPG_ARGS} app org.debian.Stress.json
-	flatpak build-bundle $(REPO) debian-stress.bundle org.debian.Stress master
+	flatpak build-bundle $(REPO) debian-stress-v1.0.4.flatpak org.debian.Stress master
 
 export: platform sdk
 	flatpak build-update-repo $(REPO) ${EXPORT_ARGS} --generate-static-deltas
 
 bundles: export
-	flatpak build-bundle --runtime $(REPO) debian-platform.bundle org.debian.BasePlatform $(VERSION)
-	flatpak build-bundle --runtime $(REPO) debian-sdk.bundle org.debian.BaseSdk $(VERSION)
+	flatpak build-bundle --runtime $(REPO) debian-platform-v$(VERSION).flatpak org.debian.BasePlatform $(VERSION)
+	flatpak build-bundle --runtime $(REPO) debian-sdk-v$(VERSION).flatpak org.debian.BaseSdk $(VERSION)
+
+clean:
+	sudo rm -rf app build images repo *.flatpak

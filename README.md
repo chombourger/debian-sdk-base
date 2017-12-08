@@ -31,10 +31,10 @@ A sample application is provided with this distribution, install
 the previously generated bundles and build the application with:
 
 ```
-flatpak install --user --bundle --runtime debian-platform.bundle
-flatpak install --user --bundle --runtime debian-sdk.bundle
+flatpak install --user --bundle --runtime debian-platform-v0.1.flatpak
+flatpak install --user --bundle --runtime debian-sdk-v0.1.flatpak
 make sandboxed
-flatpak install --user --bundle debian-stress.bundle
+flatpak install --user --bundle debian-stress-v1.0.4.flatpak
 ```
 
 You may then run the stress application with:
