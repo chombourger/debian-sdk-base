@@ -73,12 +73,12 @@ ${FILE_REF_PLATFORM}: metadata.platform.in ${PLATFORM_IMAGE}
 	rm -rf platform
 
 sandboxed:
-	flatpak-builder --force-clean  app org.debian.Stress.json
-	flatpak build app make all
+	flatpak-builder --repo=$(REPO) --force-clean app org.debian.Stress.json
+	flatpak build-bundle $(REPO) debian-stress.bundle org.debian.Stress master
 
 export: platform sdk
 	flatpak build-update-repo $(REPO) ${EXPORT_ARGS} --generate-static-deltas
 
 bundles: export
-	flatpak build-bundle --runtime $(REPO) debian-platform org.debian.BasePlatform $(VERSION)
-	flatpak build-bundle --runtime $(REPO) debian-sdk org.debian.BaseSdk $(VERSION)
+	flatpak build-bundle --runtime $(REPO) debian-platform.bundle org.debian.BasePlatform $(VERSION)
+	flatpak build-bundle --runtime $(REPO) debian-sdk.bundle org.debian.BaseSdk $(VERSION)

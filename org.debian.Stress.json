@@ -3,7 +3,7 @@
     "runtime": "org.debian.BasePlatform",
     "runtime-version": "0.1",
     "sdk": "org.debian.BaseSdk",
-    "command": "/usr/bin/stress",
+    "command": "stress",
     "finish-args": [
         "--talk-name=org.freedesktop.Flatpak",
         "--share=network",

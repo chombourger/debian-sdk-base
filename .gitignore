@@ -1,7 +1,6 @@
+*.bundle
 .flatpak-builder
 app
 build
 images
 repo
-debian-platform
-debian-sdk
