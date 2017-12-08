@@ -68,8 +68,14 @@ create_manifest() {
 package_platform() {
 	mkdir -p ${IMG_DIR}						\
 	&& fix_runtime ${PF_DIR}					\
-	&& sudo tar -C ${PF_DIR}					\
-		-zcf ${IMG_DIR}/${PF_IMG}.tar.gz .			\
+	&& sudo tar 							\
+		--exclude=./usr/share/doc 				\
+		--exclude=./usr/share/doc-base				\
+		--exclude=./usr/share/include				\
+		--exclude=./usr/share/info				\
+		--exclude=./usr/share/man 				\
+		-C ${PF_DIR}						\
+		-zcf ${IMG_DIR}/${PF_IMG}.tar.gz . 			\
 	&& create_manifest ${PF_DIR} ${IMG_DIR}/${PF_IMG}.manifest
 }
 
